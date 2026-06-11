@@ -10,6 +10,10 @@ from bs4 import BeautifulSoup, NavigableString
 
 ROOT = Path(__file__).resolve().parents[1]
 
+# Book pages and their engravings live in text/; only these stay at the repo root.
+TEXT_DIR = "text"
+ROOT_FILES = {"index.html", "map/index.html"}
+
 PAGES = [
 	{
 		"file": "index.html",
@@ -181,16 +185,24 @@ NAV_GROUPS = [
 ]
 
 
+def disk_path(file: str) -> str:
+	"""Map a logical page name to its on-disk location (book pages live in text/)."""
+	if file in ROOT_FILES:
+		return file
+	return f"{TEXT_DIR}/{file}"
+
+
+def _rel(from_file: str, to_path: str) -> str:
+	start = (ROOT / from_file).parent
+	return os.path.relpath(ROOT / to_path, start=start).replace(os.sep, "/")
+
+
 def rel_url(current_file: str, target_file: str) -> str:
-	current_dir = Path(current_file).parent
-	start = ROOT / current_dir
-	target = ROOT / target_file
-	rel = os.path.relpath(target, start=start).replace(os.sep, "/")
-	return rel
+	return _rel(disk_path(current_file), disk_path(target_file))
 
 
 def asset_url(current_file: str, asset_path: str) -> str:
-	return rel_url(current_file, asset_path)
+	return _rel(disk_path(current_file), asset_path)
 
 
 def h(value: str) -> str:
@@ -300,7 +312,7 @@ def normalize_legacy_fragment(source_file: str, raw: str) -> str:
 
 
 def extract_article(source_file: str) -> str:
-	path = ROOT / source_file
+	path = ROOT / disk_path(source_file)
 	raw = path.read_text(encoding="utf-8", errors="replace")
 	return normalize_legacy_fragment(source_file, raw)
 
@@ -314,7 +326,6 @@ def render_sidebar(current_file: str) -> str:
 			active = " active" if file_name == current_file else ""
 			links.append(
 				f'<li><a class="nav-link{active}" href="{h(rel_url(current_file, file_name))}" title="{h(page["title"])}">'
-				f'<span class="nav-icon" aria-hidden="true">{h(page["nav"][0])}</span>'
 				f'<span class="bs-sidebar-label">{h(page["nav"])}</span></a></li>'
 			)
 		groups.append(
@@ -467,17 +478,9 @@ def render_home(page: dict[str, str]) -> str:
 		'</div>'
 		'</div>'
 		'<figure class="hero-engraving card">'
-		'<img src="lynchcastle.jpg" alt="Lynch\'s Castle, Galway" loading="eager" decoding="async">'
+		f'<img src="{h(asset_url(current_file, "text/lynchcastle.jpg"))}" alt="Lynch\'s Castle, Galway" loading="eager" decoding="async">'
 		"<figcaption>Lynch's Castle, Galway, one of the engravings included with the text.</figcaption>"
 		'</figure>'
-		'</section>'
-		'<section class="notice" aria-label="OCR notice"><span class="notice-mark" aria-hidden="true">!</span>'
-		'<p><strong>Scanned/OCRed source.</strong> The text is preserved as received and has not been proofed against the printed book.</p></section>'
-		'<section class="stats-grid" aria-label="Site summary">'
-		'<div class="stat-card card"><span class="stat-value">1820</span><span class="stat-label">First publication</span></div>'
-		'<div class="stat-card card"><span class="stat-value">7</span><span class="stat-label">Part I chapters</span></div>'
-		'<div class="stat-card card"><span class="stat-value">4</span><span class="stat-label">Map scan panels</span></div>'
-		'<div class="stat-card card"><span class="stat-value">1995</span><span class="stat-label">HTML transcription credit</span></div>'
 		'</section>'
 		'<section class="section-header">'
 		'<div><p class="eyebrow">Contents</p><h2>Read the book</h2></div>'
@@ -520,7 +523,7 @@ def main() -> None:
 		else:
 			output = render_article_page(page)
 
-		path = ROOT / page["file"]
+		path = ROOT / disk_path(page["file"])
 		path.parent.mkdir(parents=True, exist_ok=True)
 		path.write_text(output, encoding="utf-8")
 		print(f"wrote {page['file']}")

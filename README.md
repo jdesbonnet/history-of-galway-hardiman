@@ -8,6 +8,10 @@ Read it online:
 
 https://jdesbonnet.github.io/history-of-galway-hardiman/
 
+![Lynch's Castle, Galway](text/lynchcastle.jpg)
+
+*Lynch's Castle, Galway — one of the engravings included with the text.*
+
 ## About
 
 This repository preserves a web transcription of Hardiman's early nineteenth
@@ -19,29 +23,6 @@ Hardiman's work is a major early printed history of Galway, covering the town's
 name, the "Tribes of Galway", medieval and early modern civic history, religious
 institutions, public buildings, trade, fisheries, charities, markets, and the
 state of the town as it stood in Hardiman's own time.
-
-## Contents
-
-- [Letter to James Daly, Esq.](letter.html)
-- [Preface](preface.html)
-- Part I: The ancient state of the town, and its civil and military history
-  - [Chapter 1](c1.html): the name Galway, the Tribes of Galway, and the old map
-  - [Chapter 2](c2.html): earliest accounts to the invasion of Henry II
-  - [Chapter 3](c3.html): Anglo-Norman invasion to 1484
-  - [Chapter 4](c4.html): 1484 to the Irish Rebellion of 1641
-  - [Chapter 5](c5.html): 1641 to the Restoration of Charles II in 1660
-  - [Chapter 6](c6.html): 1660 to the surrender of Galway to Williamite forces
-    in 1691
-  - [Chapter 7](c7.html): 1691 to the present time of the 1820 edition
-- Part II: listed in the site index, but no Part II HTML file is currently in
-  this repository
-- [Part III](part3.html): ecclesiastical history
-- [Part IV](part4.html): the modern state and description of the town
-- [Postscript concerning the engravings](engravings.html)
-- [Map scans](map/)
-
-Several engravings are included as image files, including St. Nicholas'
-Collegiate Church, Lynch's Castle, the county court house, and the old fort.
 
 ## Copyright Status
 
