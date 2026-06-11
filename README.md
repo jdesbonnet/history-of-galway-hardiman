@@ -1,6 +1,6 @@
 # Hardiman's History of Galway
 
-Static HTML edition of James Hardiman's *The History of the Town and County
+This is an online edition of James Hardiman's *The History of the Town and County
 of the Town of Galway. From the Earliest Period to the Present Time*, first
 published in Dublin by W. Folds & Sons in 1820.
 
