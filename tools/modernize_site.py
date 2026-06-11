@@ -42,7 +42,7 @@ PAGES = [
 	{
 		"file": "c1.html",
 		"title": "Chapter 1",
-		"nav": "Chapter 1",
+		"nav": "1 · The name, Tribes, and old map",
 		"section": "Part I",
 		"subtitle": "The name Galway, the Tribes of Galway, and the old map.",
 		"kind": "article",
@@ -59,7 +59,7 @@ PAGES = [
 	{
 		"file": "c2.html",
 		"title": "Chapter 2",
-		"nav": "Chapter 2",
+		"nav": "2 · Earliest accounts to Henry II",
 		"section": "Part I",
 		"subtitle": "From the earliest accounts to the invasion of Henry II.",
 		"kind": "article",
@@ -76,7 +76,7 @@ PAGES = [
 	{
 		"file": "c3.html",
 		"title": "Chapter 3",
-		"nav": "Chapter 3",
+		"nav": "3 · Anglo-Norman invasion to 1484",
 		"section": "Part I",
 		"subtitle": "From the Anglo-Norman invasion to 1484.",
 		"kind": "article",
@@ -93,7 +93,7 @@ PAGES = [
 	{
 		"file": "c4.html",
 		"title": "Chapter 4",
-		"nav": "Chapter 4",
+		"nav": "4 · 1484 to the Irish Rebellion of 1641",
 		"section": "Part I",
 		"subtitle": "From 1484 to the commencement of the Irish Rebellion in 1641.",
 		"kind": "article",
@@ -101,7 +101,7 @@ PAGES = [
 	{
 		"file": "c5.html",
 		"title": "Chapter 5",
-		"nav": "Chapter 5",
+		"nav": "5 · 1641 to the Restoration of Charles II",
 		"section": "Part I",
 		"subtitle": "From 1641 to the Restoration of Charles II in 1660.",
 		"kind": "article",
@@ -109,7 +109,7 @@ PAGES = [
 	{
 		"file": "c6.html",
 		"title": "Chapter 6",
-		"nav": "Chapter 6",
+		"nav": "6 · 1660 to the surrender of Galway, 1691",
 		"section": "Part I",
 		"subtitle": "From 1660 to the surrender of Galway to Williamite forces in 1691.",
 		"kind": "article",
@@ -117,7 +117,7 @@ PAGES = [
 	{
 		"file": "c7.html",
 		"title": "Chapter 7",
-		"nav": "Chapter 7",
+		"nav": "7 · 1691 to the present time",
 		"section": "Part I",
 		"subtitle": "From 1691 to the present time of the 1820 edition.",
 		"kind": "article",
