@@ -14,10 +14,9 @@ https://jdesbonnet.github.io/history-of-galway-hardiman/
 
 ## About
 
-This repository preserves a web transcription of Hardiman's early nineteenth
-century history of Galway. The existing `index.html` credits the HTML markup
-to Wombat Research in 1995 and notes that the text was scanned/OCRed and has
-not been proofed.
+This repository preserves a OCRed scan of Hardiman's early nineteenth
+century history of Galway. This project was first started by myself 
+(Joe Desbonnet) in 1995.
 
 Hardiman's work is a major early printed history of Galway, covering the town's
 name, the "Tribes of Galway", medieval and early modern civic history, religious
@@ -27,8 +26,7 @@ state of the town as it stood in Hardiman's own time.
 ## Copyright Status
 
 The underlying book is out of copyright: it was published in 1820 and James
-Hardiman died in 1855. The repository keeps the original 1995 HTML credit line
-from the scanned/OCRed web edition.
+Hardiman died in 1855. 
 
 ## Notes For Readers
 
