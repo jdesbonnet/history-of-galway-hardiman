@@ -15,21 +15,28 @@ record.
 
 ## Recommendation
 
-Store the original text as the literal text content of the HTML. Add a
-`data-modern` attribute only to a phrase for which a modern display form has
-been approved:
+Store the original text and markup as the rendered children of a
+`data-text-variant` wrapper. Put the approved modern version in an inert
+`<template>` inside that wrapper:
 
 ```html
-<h3><span data-modern="Chapter 1">CHAP. I.</span></h3>
+<h3><span data-text-variant>CHAP. I.<template data-modern>Chapter <span class="chapter-number">1</span></template></span></h3>
 ```
 
-In the original view, the browser displays `CHAP. I.`. In the modernised view,
-shared JavaScript replaces that span's displayed text with `Chapter 1`. The
-script retains the original value in memory and restores it when the reader
-switches back.
+The `<template>` element is inert: its contents are parsed as HTML but are not
+rendered, exposed in the accessibility tree, or included in selection. In the
+original view, the browser therefore displays `CHAP. I.`. In the modernised
+view, shared JavaScript replaces the wrapper's rendered children with a clone
+of the template content.
+
+Both variants may contain markup that is valid at the insertion point. For
+example, a modern version can use `<abbr>`, `<em>`, `<span lang="...">`, or
+other appropriate inline semantics without escaping HTML into an attribute.
+The script must clone DOM nodes; it must not serialize or parse either version
+with `innerHTML`.
 
 This duplicates only the short phrases that differ, not paragraphs, chapters,
-or pages. The HTML source, no-JavaScript experience, and default indexed text
+or pages. The no-JavaScript, default rendered, accessible, and selectable text
 all remain verbatim.
 
 ## Why This Model
@@ -45,18 +52,19 @@ receives the complete original edition.
 Each modernisation sits beside its source phrase. A reviewer can inspect:
 
 ```html
-<span data-modern="Chapter 1">CHAP. I.</span>
+<span data-text-variant>CHAP. I.<template data-modern>Chapter <span class="chapter-number">1</span></template></span>
 ```
 
 without consulting a second document or matching offsets into a large text
-file. A repository search for `data-modern` produces the full modernisation
-inventory.
+file. A repository search for `data-text-variant` produces the full
+modernisation inventory.
 
 ### Existing semantics are preserved
 
-The annotation is an inline `<span>` and does not alter heading, paragraph,
-quotation, emphasis, link, or footnote semantics. The span should wrap the
-smallest complete phrase that can be safely replaced.
+For an inline substitution, the annotation is a `<span>` and does not alter
+the surrounding heading, paragraph, quotation, link, or footnote semantics.
+Markup inside either variant can express local semantics. The wrapper should
+contain the smallest complete fragment that can be safely replaced.
 
 ### It supports progressive enhancement
 
@@ -87,12 +95,21 @@ ambiguous on/off switch because both available states are named.
 
 The shared script in `assets/site.js` should:
 
-1. Find every element with a `data-modern` attribute.
-2. Record its original `textContent` before making any replacement.
-3. Apply either the original or modern value to all annotated elements.
-4. Update the radio control and set `data-text-view` on `<html>`.
-5. Save the reader's preference in `localStorage`.
-6. Use `original` when there is no saved preference or storage is unavailable.
+1. Find every element with a `data-text-variant` attribute.
+2. Find its one direct child `<template data-modern>`.
+3. Snapshot the original child nodes other than the template and snapshot the
+   template's `content` in a `WeakMap`.
+4. Render a variant with `replaceChildren()` and a deep clone of the
+   corresponding snapshot.
+5. Update the radio control and set `data-text-view` on `<html>`.
+6. Save the reader's preference in `localStorage`.
+7. Use `original` when there is no saved preference or storage is unavailable.
+
+The snapshots must be made for every wrapper before any variant is rendered.
+This ensures that switching can be repeated in either direction even though
+`replaceChildren()` removes the template from the live wrapper. Scripts must
+not execute content from a template or accept modern fragments from URL
+parameters or other untrusted input.
 
 The preference should apply across book pages. The control must work by
 keyboard, retain normal visible focus styles, and have a programmatic legend.
@@ -113,6 +130,21 @@ parameter.
 The page should identify the active mode near the control. Readers citing the
 book should be advised that the original view is authoritative and that the
 modernised wording is editorial.
+
+## Machine Extraction
+
+In a browser, template content is inert and only the selected variant is
+rendered. A source-level HTML parser may nevertheless choose to inspect
+`template.content` and therefore encounter both variants. Exporters and corpus
+tools must use one of these explicit policies:
+
+- for the canonical transcription, ignore every `<template data-modern>`;
+- for the modernised reading view, apply the same fragment replacement as the
+  browser before extracting text.
+
+Tools must not concatenate the wrapper's original content and its template
+content. This extraction rule should be included in any future plain-text,
+EPUB, search-index, or corpus-generation tooling.
 
 ## Editorial Scope
 
@@ -143,21 +175,28 @@ Capitalization may be modernised as part of an approved structural label, as in
 
 ## Annotation Rules
 
-- Use `data-modern` only when the modern value differs from the original.
-- Keep the original value as the element's literal text content.
-- Wrap the smallest meaningful phrase, but do not split a replacement across
-  multiple annotated elements.
-- Do not place interactive content such as links or footnote references inside
-  a replaceable span.
-- Do not put HTML in `data-modern`; modern values are plain text and must be
-  assigned with `textContent`.
+- Use one direct child `<template data-modern>` inside each
+  `[data-text-variant]` wrapper.
+- Keep the original version as the wrapper's ordinary child nodes, outside the
+  template.
+- Mark up both variants normally; do not encode HTML in an attribute.
+- Use a `<span>` wrapper for phrasing content. Any future block-level variant
+  requires an appropriate flow-content wrapper and separate review.
+- Ensure each variant's markup is valid in the wrapper's context.
+- Wrap the smallest meaningful fragment, but do not split one replacement
+  across multiple variant wrappers.
+- Do not nest `[data-text-variant]` wrappers.
+- Do not include IDs, links, controls, scripts, styles, or footnote references
+  in either replaceable fragment. Stable and interactive content must remain
+  outside the wrapper.
 - Do not annotate OCR mistakes. Correct those in the original transcription and
   record them in the OCR correction log.
 - Treat every annotation as an editorial assertion requiring review.
 
-If a proposed modernisation needs emphasis, links, ruby text, or other nested
-markup, it is outside the first version of this scheme and should be reviewed
-separately.
+Inline semantic markup such as emphasis, abbreviations, language spans, and
+ruby text is supported. A proposed modernisation that changes surrounding
+document structure or includes interactive content is outside the first
+version of this scheme and should be reviewed separately.
 
 ## Audit Trail
 
@@ -174,11 +213,17 @@ The generated inventory should not become the source of the replacements; the
 HTML remains the source. It can be committed as a review artefact if the
 project wants a human-readable change register.
 
+For review, the inventory should preserve serialized markup as well as provide
+plain-text columns for both variants.
+
 The validator should fail when:
 
-- `data-modern` is empty or equals the original text;
-- an annotated element contains child elements;
-- an annotated element contains no original text;
+- a wrapper does not have exactly one direct child `<template data-modern>`;
+- either variant is empty or the two variants have equivalent markup;
+- a wrapper contains another `[data-text-variant]`;
+- either variant contains an ID, interactive content, a script, a style, or a
+  footnote reference;
+- the resulting markup is invalid in its insertion context;
 - a modernisation appears outside a book article without an explicit
   exception;
 - the same edition-control ID occurs more than once on a page.
@@ -208,12 +253,19 @@ Hiding original text and injecting replacements with `::before` or
 searching, and printing. CSS should control presentation, not supply edition
 text.
 
+### HTML stored in an attribute
+
+An attribute such as `data-modern="Chapter 1"` is adequate only for plain text.
+Markup would have to be escaped and later parsed, making authoring, validation,
+and security worse. The template model lets the HTML parser handle normal
+markup and provides a `DocumentFragment` that can be cloned directly.
+
 ### Two child spans per replacement
 
-Keeping original and modern strings in separate child elements permits
-CSS-only switching, but both variants enter the document tree and require
-careful hiding from assistive technology. It also duplicates markup and creates
-poor copy-and-search behaviour.
+Keeping original and modern fragments in two ordinary child elements permits
+CSS-only switching, but both variants enter the rendered document tree and
+require careful hiding from assistive technology. An inert template has
+clearer no-JavaScript, copy, selection, and search behaviour.
 
 ### A separate JSON replacement file
 
@@ -254,8 +306,8 @@ annotations reviewed in context.
 
 - The unmodified HTML response contains the complete original transcription.
 - Disabling JavaScript leaves the original edition readable.
-- Switching views never changes links, IDs, footnote targets, or document
-  structure.
+- Switching views changes content only inside `[data-text-variant]` wrappers
+  and never changes links, IDs, footnote targets, or surrounding structure.
 - The reader's choice persists across book pages.
 - `?view=original` and `?view=modern` select a predictable initial view.
 - Copying or searching text uses only the currently displayed variant.
@@ -266,6 +318,7 @@ annotations reviewed in context.
 
 ## Decision Requested
 
-Approve the annotated-source model for a small proof of concept limited to
-structural labels. This tests the interaction and editorial workflow without
-committing the project to prose modernisation or a second full-text edition.
+Approve the annotated-template model for a small proof of concept limited to
+structural labels. This tests rich modern markup, the interaction, and the
+editorial workflow without committing the project to prose modernisation or a
+second full-text edition.
